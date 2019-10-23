@@ -96,3 +96,25 @@ QUnit.test('Can set hash to empty string after it has a value (#3)', function(as
 		teardown();
 	}, assert);
 });
+
+QUnit.test('Can override root on HashChangeObservable', function(assert){
+	var teardown = helpers.setup(function(RouteHash, canReflect, win){
+		win.location.hash = "";
+		var routeHash = new RouteHash();
+		routeHash.root = "#/";
+		var handler = function() {
+			canReflect.offValue(routeHash, handler);
+		};
+		// Set up a binding
+		canReflect.onValue(routeHash, handler);
+
+		win.location.hash = "#/foo";
+		assert.equal(routeHash.value, "foo", "Setting the hash changes the observable");
+
+
+		routeHash.value = "";
+		assert.equal(win.location.hash, "#/", "Updating the observable back to an empty string changes the hash");
+
+		teardown();
+	}, assert);
+});

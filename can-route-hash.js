@@ -11,9 +11,10 @@ var SimpleObservable = require("can-simple-observable");
 
 var domEvents = require("can-dom-events");
 
-function getHash(){
+function getHash(root){
     var loc = LOCATION();
-    return loc.href.split(/#!?/)[1] || "";
+    const re = new RegExp(root +"?");
+    return loc.href.split(re)[1] || "";
 }
 
 function HashchangeObservable() {
@@ -22,7 +23,7 @@ function HashchangeObservable() {
 		this._value = "";
     this.handlers = new KeyTree([Object,Array],{
         onFirst: function(){
-            self._value = getHash();
+            self._value = getHash(self.root);
             domEvents.addEventListener(window, 'hashchange', dispatchHandlers);
         },
         onEmpty: function(){
@@ -41,7 +42,7 @@ canReflect.assign(HashchangeObservable.prototype,{
     root: "#!",
     dispatchHandlers: function() {
         var old = this._value;
-        this._value = getHash();
+        this._value = getHash(this.root);
         if(old !== this._value) {
             queues.enqueueByQueue(this.handlers.getNode([]), this, [this._value, old]
                 //!steal-remove-start
@@ -55,14 +56,14 @@ canReflect.assign(HashchangeObservable.prototype,{
     },
     get: function(){
         ObservationRecorder.add(this);
-        return getHash();
+        return getHash(this.root);
     },
     set: function(path){
         var loc = LOCATION();
         if(!path && !loc.hash) {
 
         } else if(loc.hash !== "#" + path) {
-            loc.hash = "!" + path;
+            loc.hash = this.root.substring(1) + path;
         }
         return path;
     }
