@@ -13,8 +13,7 @@ var domEvents = require("can-dom-events");
 
 function getHash(root){
     var loc = LOCATION();
-    const re = new RegExp(root +"?");
-    return loc.href.split(re)[1] || "";
+    return loc.href.split(root)[1] || "";
 }
 
 function HashchangeObservable() {
